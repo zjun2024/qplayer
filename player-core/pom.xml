@@ -66,4 +66,22 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Fixture tests construct a real PlayerController; keep the
+                 bundled .qplug resources out of those runs so no live source
+                 plugin is installed beside the fixture. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.4</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <qplayer.skipBundledPlugins>true</qplayer.skipBundledPlugins>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

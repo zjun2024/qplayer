@@ -33,6 +33,7 @@ import dev.t1m3.qplayer.playlist.MyPlaylistOrderStore;
 import dev.t1m3.qplayer.playlist.PlaylistSubscription;
 import dev.t1m3.qplayer.playlist.PlaylistTrack;
 import dev.t1m3.qplayer.playlist.PlaylistTransfer;
+import dev.t1m3.qplayer.plugin.BundledPluginService;
 import dev.t1m3.qplayer.plugin.CorePluginHostApi;
 import dev.t1m3.qplayer.plugin.PluginManager;
 import dev.t1m3.qplayer.plugin.PluginAccountService;
@@ -228,6 +229,9 @@ public final class PlayerController {
     private final PluginPackageVerifier pluginVerifier = new PluginPackageVerifier();
     private final PluginCatalogService pluginCatalog = new PluginCatalogService(pluginVerifier);
     private final PluginSetupState pluginSetupState = new PluginSetupState();
+    /** Ships with the binary; installs any .qplug packaged in this build's resources. */
+    private final BundledPluginService bundledPlugins = new BundledPluginService(
+            pluginVerifier, pluginManager, pluginInstaller, pluginRegistry, pluginCatalog);
     private volatile PluginPicker pluginPicker;
     private volatile VerifiedPluginPackage pendingPluginPackage;
     private volatile boolean pendingPluginPackageTemporary;
@@ -992,6 +996,9 @@ public final class PlayerController {
         mediaPlaylistCacheIndex.load();
         playlistCacheIndex.load();
         diskCache.loadActivelyCached();
+        // Before startEnabled(): a package installed here starts in the same
+        // startup pass, and publishPlugins() below already reflects it.
+        bundledPlugins.installMissing();
         pluginManager.startEnabled();
         loadQueue();
         loadCustomPlaylist();

@@ -334,6 +334,28 @@ public final class PluginCatalogService {
         }
     }
 
+    /**
+     * Pinned publisher key for a catalog source, or {@code null} when the id is
+     * not one of the known repositories (or its key cannot be decoded). Used by
+     * {@link BundledPluginService} to keep bundled packages on the same
+     * signature requirement as a repository install.
+     */
+    public PublicKey publisherKeyFor(String pluginId) throws IOException {
+        if (pluginId == null || pluginId.isEmpty()) return null;
+        for (Source source : sources()) {
+            if (source.id.equals(pluginId)) {
+                try {
+                    return decodeKey(source.publisherKey);
+                } catch (GeneralSecurityException error) {
+                    Logger.warn("catalog source {} has an unusable publisher key: {}",
+                            source.id, error.getMessage());
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
     private static void download(String raw, Path target, long limit) throws IOException {
         String current = raw;
         for (int redirects = 0; redirects <= 5; redirects++) {
